@@ -1,6 +1,9 @@
 mod v1 {
     pub mod routes;
 }
+mod handlers {
+    pub mod location_handlers;
+}
 
 use axum::http::{
     header::{ACCEPT, AUTHORIZATION, CONTENT_TYPE},
