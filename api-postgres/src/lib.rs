@@ -4,12 +4,23 @@ mod v1 {
 mod handlers {
     pub mod location_handlers;
 }
+mod services {
+    pub mod location_services;
+}
+mod schemas {
+    pub mod location_schemas;
+}
+mod models {
+    pub mod location_model;
+}
 
-use axum::http::{
-    header::{ACCEPT, AUTHORIZATION, CONTENT_TYPE},
-    HeaderValue, Method,
+use axum::{
+    http::{
+        header::{ACCEPT, AUTHORIZATION, CONTENT_TYPE},
+        HeaderValue, Method,
+    },
+    Router,
 };
-use axum::Router;
 use dotenv::dotenv;
 use std::env::{self};
 use std::net::SocketAddr;
