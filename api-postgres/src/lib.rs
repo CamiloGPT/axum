@@ -2,6 +2,7 @@ mod v1 {
     pub mod routes;
 }
 mod handlers {
+    pub mod health_handlers;
     pub mod location_handlers;
 }
 mod services {
