@@ -1,3 +1,4 @@
+mod config;
 mod v1 {
     pub mod routes;
 }
@@ -15,28 +16,27 @@ mod models {
     pub mod location_model;
 }
 
-use axum::{
-    http::{
-        header::{ACCEPT, AUTHORIZATION, CONTENT_TYPE},
-        HeaderValue, Method,
-    },
-    Router,
+use axum::http::{
+    header::{ACCEPT, AUTHORIZATION, CONTENT_TYPE},
+    HeaderValue, Method,
 };
-use dotenv::dotenv;
-use std::env::{self};
+use config::config;
 use std::net::SocketAddr;
+use std::sync::Arc;
 use tokio::net::TcpListener;
 use tower_http::cors::CorsLayer;
-use v1::routes::setup_routes;
+use v1::routes::create_router;
+
+pub struct AppState {}
 
 pub async fn run() {
-    dotenv().ok();
-
-    let port = env::var("APP_PORT").expect("APP_PORT must be set");
-    let address = format!("0.0.0.0:{}", port);
-    let addr = address
+    let config = config().await;
+    let address = format!("{}:{}", config.server_host(), config.server_port());
+    let addr: SocketAddr = address
         .parse::<SocketAddr>()
         .expect("Dirección IP inválida");
+
+    //let database_url = config.db_url();
 
     let cors = CorsLayer::new()
         .allow_origin("http://localhost:4200".parse::<HeaderValue>().unwrap())
@@ -44,10 +44,9 @@ pub async fn run() {
         .allow_credentials(true)
         .allow_headers([AUTHORIZATION, ACCEPT, CONTENT_TYPE]);
 
-    let api_routes = setup_routes();
-    let app = Router::new().nest("/api/v1", api_routes).layer(cors);
-
+    let app = create_router(Arc::new(AppState {})).layer(cors);
     let listener = TcpListener::bind(&addr).await.unwrap();
 
+    println!("🚀 Server started successfully on http//:{}", addr);
     axum::serve(listener, app).await.unwrap();
 }
