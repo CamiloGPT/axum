@@ -1,4 +1,6 @@
 mod config;
+mod database;
+mod utils;
 mod v1 {
     pub mod routes;
 }
@@ -21,6 +23,7 @@ use axum::http::{
     HeaderValue, Method,
 };
 use config::config;
+use database::create_pool;
 use std::net::SocketAddr;
 use std::sync::Arc;
 use tokio::net::TcpListener;
@@ -36,7 +39,8 @@ pub async fn run() {
         .parse::<SocketAddr>()
         .expect("Dirección IP inválida");
 
-    //let database_url = config.db_url();
+    let database_url = config.db_url();
+    let pool = create_pool(database_url, config.db_max_pool(), config.db_min_pool()).await;
 
     let cors = CorsLayer::new()
         .allow_origin("http://localhost:4200".parse::<HeaderValue>().unwrap())

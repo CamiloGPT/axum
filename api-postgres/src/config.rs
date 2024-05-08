@@ -11,6 +11,8 @@ struct ServerConfig {
 #[derive(Debug)]
 struct DatabaseConfig {
     url: String,
+    max_pool: u32,
+    min_pool: u32,
 }
 
 #[derive(Debug)]
@@ -20,16 +22,24 @@ pub struct Config {
 }
 
 impl Config {
-    pub fn db_url(&self) -> &str {
-        &self.db.url
-    }
-
     pub fn server_host(&self) -> &str {
         &self.server.host
     }
 
     pub fn server_port(&self) -> u16 {
         self.server.port
+    }
+
+    pub fn db_url(&self) -> &str {
+        &self.db.url
+    }
+
+    pub fn db_max_pool(&self) -> u32 {
+        self.db.max_pool
+    }
+
+    pub fn db_min_pool(&self) -> u32 {
+        self.db.min_pool
     }
 }
 
@@ -48,6 +58,14 @@ async fn init_config() -> Config {
 
     let database_config = DatabaseConfig {
         url: env::var("DATABASE_URL").expect("DATABASE_URL must be set"),
+        max_pool: env::var("POSTGRES_MAX_POOL_SIZE")
+            .unwrap_or_else(|_| String::from("10"))
+            .parse::<u32>()
+            .unwrap(),
+        min_pool: env::var("POSTGRES_MIN_POOL_SIZE")
+            .unwrap_or_else(|_| String::from("5"))
+            .parse::<u32>()
+            .unwrap(),
     };
 
     Config {
